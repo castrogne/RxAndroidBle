@@ -122,10 +122,12 @@ public class RxBleGattCallback {
             nativeCallbackDispatcher.notifyNativeWriteCallback(gatt, characteristic, status);
             super.onCharacteristicWrite(gatt, characteristic, status);
 
-            if (writeCharacteristicOutput.hasObservers() && !propagateErrorIfOccurred(
-                    writeCharacteristicOutput, gatt, characteristic, status, BleGattOperationType.CHARACTERISTIC_WRITE
-            )) {
-                writeCharacteristicOutput.valueRelay.accept(new ByteAssociation<>(characteristic.getUuid(), characteristic.getValue()));
+            if (writeCharacteristicOutput.hasObservers()) {
+                byte[] writtenData = new byte[0];
+                if (!isException(status)) {
+                    writtenData = characteristic.getValue();
+                }
+                writeCharacteristicOutput.valueRelay.accept(new ByteAssociation<>(characteristic.getUuid(), writtenData));
             }
         }
 
